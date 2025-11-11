@@ -10,6 +10,7 @@ namespace Application.Interfaces
     public interface IEmployerRepository
     {
         Task<Employer> GetByUserIdAsync(string userId);
+        Task<IEnumerable<Employer>> GetAllAsync();
         Task<IEnumerable<Employer>> GetVerifiedEmployersAsync();
         Task<Employer> AddAsync(Employer employer);
     }

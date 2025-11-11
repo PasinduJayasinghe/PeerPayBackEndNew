@@ -27,6 +27,17 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(j => j.JobId == jobId);
         }
 
+        public async Task<IEnumerable<Job>> GetAllAsync()
+        {
+            return await _context.Jobs
+                .Include(j => j.Employer)
+                    .ThenInclude(e => e.User)
+                .Include(j => j.Category)
+                .Include(j => j.Applications)
+                .OrderByDescending(j => j.PostedDate)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Job>> GetActiveJobsAsync()
         {
             return await _context.Jobs

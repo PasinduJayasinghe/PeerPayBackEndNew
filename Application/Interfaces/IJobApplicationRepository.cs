@@ -7,6 +7,7 @@ namespace Application.Interfaces
     {
         Task<JobApplication> CreateApplicationAsync(JobApplication application);
         Task<JobApplication?> GetApplicationByIdAsync(string applicationId);
+        Task<List<JobApplication>> GetAllAsync();
         Task<List<JobApplication>> GetApplicationsByUserIdAsync(string userId);
         Task<List<JobApplication>> GetApplicationsByJobIdAsync(string jobId);
         Task<JobApplication?> GetApplicationByJobAndUserAsync(string jobId, string userId);

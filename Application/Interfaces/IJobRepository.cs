@@ -10,6 +10,7 @@ namespace Application.Interfaces
     public interface IJobRepository
     {
         Task<Job> GetByIdAsync(string jobId);
+        Task<IEnumerable<Job>> GetAllAsync();
         Task<IEnumerable<Job>> GetActiveJobsAsync();
         Task<IEnumerable<Job>> GetJobsByEmployerAsync(string employerId);
         Task<IEnumerable<Job>> GetJobsByCategoryAsync(string categoryId);

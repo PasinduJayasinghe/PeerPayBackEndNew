@@ -30,6 +30,17 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
         }
 
+        public async Task<List<JobApplication>> GetAllAsync()
+        {
+            return await _context.JobApplications
+                .Include(a => a.Job)
+                    .ThenInclude(j => j.Employer)
+                        .ThenInclude(e => e.User)
+                .Include(a => a.User)
+                .OrderByDescending(a => a.AppliedDate)
+                .ToListAsync();
+        }
+
         public async Task<List<JobApplication>> GetApplicationsByUserIdAsync(string userId)
         {
             return await _context.JobApplications
