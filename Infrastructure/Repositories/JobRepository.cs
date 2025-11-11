@@ -34,6 +34,7 @@ namespace Infrastructure.Repositories
                 .Include(j => j.Employer)
                     .ThenInclude(e => e.User)
                 .Include(j => j.Category)
+                .Include(j => j.Applications)
                 .Where(j => j.Status == JobStatus.Active && j.Deadline > DateTime.UtcNow)
                 .OrderByDescending(j => j.PostedDate)
                 .ToListAsync();
