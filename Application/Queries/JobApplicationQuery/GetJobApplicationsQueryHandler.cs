@@ -37,7 +37,7 @@ namespace Application.Queries.JobApplicationQuery
                 AppliedAt = app.AppliedDate,
                 Status = app.Status.ToString(),
                 CoverLetter = app.CoverLetter,
-                Attachments = app.Attachments,
+                Attachments = app.Attachments ?? Array.Empty<string>(),
                 StatusUpdatedAt = app.StatusUpdatedAt,
                 EmployerNotes = app.EmployerNotes
             }).ToList();

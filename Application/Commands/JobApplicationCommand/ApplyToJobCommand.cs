@@ -8,6 +8,5 @@ namespace Application.Commands.JobApplicationCommand
         public string JobId { get; set; } = string.Empty;
         public string StudentId { get; set; } = string.Empty;
         public string CoverLetter { get; set; } = string.Empty;
-        public string[]? Attachments { get; set; }
     }
 }

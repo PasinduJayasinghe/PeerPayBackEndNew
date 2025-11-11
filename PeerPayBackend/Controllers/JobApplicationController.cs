@@ -31,7 +31,10 @@ namespace PeerPayBackend.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { error = ex.Message });
+                var errorMessage = ex.InnerException != null 
+                    ? $"{ex.Message} Inner: {ex.InnerException.Message}" 
+                    : ex.Message;
+                return BadRequest(new { error = errorMessage });
             }
         }
 

@@ -44,7 +44,7 @@ namespace Application.Commands.JobApplicationCommand
             // Validate the command
             var validator = new ApplyToJobCommandValidator();
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
-            
+
             if (!validationResult.IsValid)
             {
                 throw new ValidationException(validationResult.Errors);
@@ -69,7 +69,7 @@ namespace Application.Commands.JobApplicationCommand
             }
 
             // Check if student exists
-            var student = await _studentRepository.GetByUserIdAsync(request.StudentId);
+            var student = await _studentRepository.GetStudentByIdAsync(request.StudentId);
             if (student == null)
             {
                 throw new Exception("Student not found");
@@ -101,36 +101,43 @@ namespace Application.Commands.JobApplicationCommand
                 AppliedDate = DateTime.UtcNow,
                 Status = ApplicationStatus.Submitted,
                 CoverLetter = request.CoverLetter,
-                Attachments = request.Attachments ?? Array.Empty<string>(),
+                Attachments = Array.Empty<string>(), // No attachments for now
                 StatusUpdatedAt = DateTime.UtcNow,
                 UpdatedBy = request.StudentId,
                 EmployerNotes = string.Empty
             };
 
-            var createdApplication = await _jobApplicationRepository.CreateApplicationAsync(application);
-
-            // Load the full application with related data for the response
-            var fullApplication = await _jobApplicationRepository.GetApplicationByIdAsync(createdApplication.ApplicationId);
-
-            if (fullApplication == null)
+            try
             {
-                throw new Exception("Failed to retrieve created application");
+                var createdApplication = await _jobApplicationRepository.CreateApplicationAsync(application);
+
+                // Load the full application with related data for the response
+                var fullApplication = await _jobApplicationRepository.GetApplicationByIdAsync(createdApplication.ApplicationId);
+
+                if (fullApplication == null)
+                {
+                    throw new Exception("Failed to retrieve created application");
+                }
+
+                return new JobApplicationDto
+                {
+                    Id = fullApplication.ApplicationId,
+                    JobId = fullApplication.JobId,
+                    JobTitle = fullApplication.Job?.Title ?? string.Empty,
+                    StudentId = fullApplication.StudentId,
+                    StudentName = fullApplication.Student?.User?.Name ?? string.Empty,
+                    AppliedAt = fullApplication.AppliedDate,
+                    Status = fullApplication.Status.ToString(),
+                    CoverLetter = fullApplication.CoverLetter,
+                    Attachments = fullApplication.Attachments ?? Array.Empty<string>(),
+                    StatusUpdatedAt = fullApplication.StatusUpdatedAt,
+                    EmployerNotes = fullApplication.EmployerNotes
+                };
             }
-
-            return new JobApplicationDto
+            catch (Exception ex)
             {
-                Id = fullApplication.ApplicationId,
-                JobId = fullApplication.JobId,
-                JobTitle = fullApplication.Job?.Title ?? string.Empty,
-                StudentId = fullApplication.StudentId,
-                StudentName = fullApplication.Student?.User?.Name ?? string.Empty,
-                AppliedAt = fullApplication.AppliedDate,
-                Status = fullApplication.Status.ToString(),
-                CoverLetter = fullApplication.CoverLetter,
-                Attachments = fullApplication.Attachments,
-                StatusUpdatedAt = fullApplication.StatusUpdatedAt,
-                EmployerNotes = fullApplication.EmployerNotes
-            };
+                throw new Exception($"An error occurred while saving the entity changes. See the inner exception for details.", ex);
+            }
         }
     }
 }
