@@ -178,7 +178,33 @@ namespace PeerPayBackend.Controllers
         }
 
         /// <summary>
-        /// Advanced job search with multiple filters
+        /// Search jobs by keyword (GET version)
+        /// </summary>
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<JobDto>>> SearchJobsByKeyword(
+            [FromQuery] string q = "",
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
+        {
+            try
+            {
+                var query = new SearchJobsQuery 
+                { 
+                    SearchTerm = q,
+                    PageNumber = page,
+                    PageSize = pageSize
+                };
+                var result = await _mediator.Send(query);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Advanced job search with multiple filters (POST version)
         /// </summary>
         [HttpPost("search")]
         public async Task<ActionResult<IEnumerable<JobDto>>> SearchJobs([FromBody] SearchJobsQuery query)

@@ -66,5 +66,27 @@ namespace PeerPayBackend.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Get employer statistics
+        /// GET /api/employer/{employerId}/stats
+        /// </summary>
+        [HttpGet("{employerId}/stats")]
+        public async Task<IActionResult> GetEmployerStats(string employerId)
+        {
+            try
+            {
+                _logger.LogInformation("Getting stats for employer: {EmployerId}", employerId);
+                var query = new GetEmployerStatsQuery(employerId);
+                var result = await _mediator.Send(query);
+                
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting stats for employer: {EmployerId}", employerId);
+                return BadRequest(new { error = ex.Message });
+            }
+        }
     }
 }
