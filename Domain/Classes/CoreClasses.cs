@@ -146,7 +146,7 @@ namespace Domain.Classes
     {
         public string ApplicationId { get; set; }
         public string JobId { get; set; }
-        public string StudentId { get; set; }
+        public string UserId { get; set; }
         public DateTime AppliedDate { get; set; }
         public ApplicationStatus Status { get; set; }
         public string CoverLetter { get; set; }
@@ -157,7 +157,7 @@ namespace Domain.Classes
 
         // Navigation properties
         public Job Job { get; set; }
-        public Student Student { get; set; }
+        public User User { get; set; }
     }
 
     public class Payment

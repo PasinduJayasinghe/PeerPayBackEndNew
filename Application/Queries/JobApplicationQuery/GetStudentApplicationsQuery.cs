@@ -5,6 +5,6 @@ namespace Application.Queries.JobApplicationQuery
 {
     public class GetStudentApplicationsQuery : IRequest<List<JobApplicationDto>>
     {
-        public string StudentId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
     }
 }

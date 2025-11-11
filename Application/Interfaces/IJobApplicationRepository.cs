@@ -7,12 +7,12 @@ namespace Application.Interfaces
     {
         Task<JobApplication> CreateApplicationAsync(JobApplication application);
         Task<JobApplication?> GetApplicationByIdAsync(string applicationId);
-        Task<List<JobApplication>> GetApplicationsByStudentIdAsync(string studentId);
+        Task<List<JobApplication>> GetApplicationsByUserIdAsync(string userId);
         Task<List<JobApplication>> GetApplicationsByJobIdAsync(string jobId);
-        Task<JobApplication?> GetApplicationByJobAndStudentAsync(string jobId, string studentId);
+        Task<JobApplication?> GetApplicationByJobAndUserAsync(string jobId, string userId);
         Task<bool> UpdateApplicationStatusAsync(string applicationId, ApplicationStatus status, string updatedBy, string? employerNotes = null);
         Task<bool> DeleteApplicationAsync(string applicationId);
         Task<int> GetApplicationCountByJobIdAsync(string jobId);
-        Task<bool> HasStudentAppliedToJobAsync(string studentId, string jobId);
+        Task<bool> HasUserAppliedToJobAsync(string userId, string jobId);
     }
 }

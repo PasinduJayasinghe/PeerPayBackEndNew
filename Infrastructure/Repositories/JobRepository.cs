@@ -22,8 +22,7 @@ namespace Infrastructure.Repositories
                     .ThenInclude(e => e.User)
                 .Include(j => j.Category)
                 .Include(j => j.Applications)
-                    .ThenInclude(a => a.Student)
-                        .ThenInclude(s => s.User)
+                    .ThenInclude(a => a.User)
                 .Include(j => j.Ratings)
                 .FirstOrDefaultAsync(j => j.JobId == jobId);
         }

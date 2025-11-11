@@ -14,8 +14,8 @@ namespace Application.Commands.JobApplicationCommand
             RuleFor(x => x.JobId)
                 .NotEmpty().WithMessage("Job ID is required");
 
-            RuleFor(x => x.StudentId)
-                .NotEmpty().WithMessage("Student ID is required");
+            RuleFor(x => x.UserId)
+                .NotEmpty().WithMessage("User ID is required");
 
             RuleFor(x => x.CoverLetter)
                 .NotEmpty().WithMessage("Cover letter is required")
@@ -27,16 +27,16 @@ namespace Application.Commands.JobApplicationCommand
     {
         private readonly IJobApplicationRepository _jobApplicationRepository;
         private readonly IJobRepository _jobRepository;
-        private readonly IStudentRepository _studentRepository;
+        private readonly IUserRepository _userRepository;
 
         public ApplyToJobCommandHandler(
             IJobApplicationRepository jobApplicationRepository,
             IJobRepository jobRepository,
-            IStudentRepository studentRepository)
+            IUserRepository userRepository)
         {
             _jobApplicationRepository = jobApplicationRepository;
             _jobRepository = jobRepository;
-            _studentRepository = studentRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<JobApplicationDto> Handle(ApplyToJobCommand request, CancellationToken cancellationToken)
@@ -68,15 +68,21 @@ namespace Application.Commands.JobApplicationCommand
                 throw new Exception("The application deadline has passed");
             }
 
-            // Check if student exists
-            var student = await _studentRepository.GetStudentByIdAsync(request.StudentId);
-            if (student == null)
+            // Check if user exists
+            var user = await _userRepository.GetByIdAsync(request.UserId);
+            if (user == null)
             {
-                throw new Exception("Student not found");
+                throw new Exception("User not found");
             }
 
-            // Check if student has already applied
-            var existingApplication = await _jobApplicationRepository.HasStudentAppliedToJobAsync(request.StudentId, request.JobId);
+            // Check if user is a student
+            if (user.UserType != UserType.Student)
+            {
+                throw new Exception("Only students can apply for jobs");
+            }
+
+            // Check if user has already applied
+            var existingApplication = await _jobApplicationRepository.HasUserAppliedToJobAsync(request.UserId, request.JobId);
             if (existingApplication)
             {
                 throw new Exception("You have already applied to this job");
@@ -97,13 +103,13 @@ namespace Application.Commands.JobApplicationCommand
             {
                 ApplicationId = Guid.NewGuid().ToString(),
                 JobId = request.JobId,
-                StudentId = request.StudentId,
+                UserId = request.UserId,
                 AppliedDate = DateTime.UtcNow,
                 Status = ApplicationStatus.Submitted,
                 CoverLetter = request.CoverLetter,
                 Attachments = Array.Empty<string>(), // No attachments for now
                 StatusUpdatedAt = DateTime.UtcNow,
-                UpdatedBy = request.StudentId,
+                UpdatedBy = request.UserId,
                 EmployerNotes = string.Empty
             };
 
@@ -124,8 +130,8 @@ namespace Application.Commands.JobApplicationCommand
                     Id = fullApplication.ApplicationId,
                     JobId = fullApplication.JobId,
                     JobTitle = fullApplication.Job?.Title ?? string.Empty,
-                    StudentId = fullApplication.StudentId,
-                    StudentName = fullApplication.Student?.User?.Name ?? string.Empty,
+                    StudentId = fullApplication.UserId,
+                    StudentName = fullApplication.User?.Name ?? string.Empty,
                     AppliedAt = fullApplication.AppliedDate,
                     Status = fullApplication.Status.ToString(),
                     CoverLetter = fullApplication.CoverLetter,

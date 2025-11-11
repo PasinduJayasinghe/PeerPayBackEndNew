@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreate : Migration
+    public partial class newDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -193,7 +193,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     OtpId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     OtpCode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Purpose = table.Column<int>(type: "int", nullable: false),
                     ContactMethod = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
@@ -240,14 +240,14 @@ namespace Infrastructure.Migrations
                 {
                     StudentId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    University = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Course = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    University = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Course = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     YearOfStudy = table.Column<int>(type: "int", nullable: false),
-                    AcademicVerificationStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AcademicVerificationStatus = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Rating = table.Column<decimal>(type: "decimal(3,2)", nullable: false),
                     CompletedJobs = table.Column<int>(type: "int", nullable: false),
                     TotalEarnings = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CvUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    CvUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -314,7 +314,7 @@ namespace Infrastructure.Migrations
                 {
                     JobId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     EmployerId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    CategoryId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CategoryId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Title = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PayAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -343,7 +343,7 @@ namespace Infrastructure.Migrations
                         column: x => x.CategoryId,
                         principalTable: "JobCategories",
                         principalColumn: "CategoryId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -454,14 +454,15 @@ namespace Infrastructure.Migrations
                 {
                     ApplicationId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     JobId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    StudentId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     AppliedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    CoverLetter = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CoverLetter = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                     Attachments = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StatusUpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedBy = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    EmployerNotes = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    EmployerNotes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    StudentId = table.Column<string>(type: "nvarchar(50)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -476,7 +477,12 @@ namespace Infrastructure.Migrations
                         name: "FK_JobApplications_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
-                        principalColumn: "StudentId",
+                        principalColumn: "StudentId");
+                    table.ForeignKey(
+                        name: "FK_JobApplications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -664,15 +670,20 @@ namespace Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_JobApplications_JobId_StudentId",
+                name: "IX_JobApplications_JobId_UserId",
                 table: "JobApplications",
-                columns: new[] { "JobId", "StudentId" },
+                columns: new[] { "JobId", "UserId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_JobApplications_StudentId",
                 table: "JobApplications",
                 column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JobApplications_UserId",
+                table: "JobApplications",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_JobCategories_Name",

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(PeerPayDbContext))]
-    [Migration("20251024150012_secondMigration")]
-    partial class secondMigration
+    [Migration("20251111100215_newDatabase")]
+    partial class newDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -292,7 +292,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CategoryId")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -367,11 +366,13 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("CoverLetter")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("EmployerNotes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("JobId")
                         .IsRequired()
@@ -385,11 +386,14 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UpdatedBy")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("UpdatedBy")
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -398,7 +402,9 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.HasIndex("JobId", "StudentId")
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("JobId", "UserId")
                         .IsUnique();
 
                     b.ToTable("JobApplications");
@@ -761,19 +767,16 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("AcademicVerificationStatus")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CompletedJobs")
                         .HasColumnType("int");
 
                     b.Property<string>("Course")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("CvUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Rating")
@@ -783,7 +786,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("University")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
@@ -1139,8 +1141,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Classes.JobCategory", "Category")
                         .WithMany("Jobs")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Domain.Classes.Employer", "Employer")
                         .WithMany("Jobs")
@@ -1161,15 +1162,19 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Classes.Student", "Student")
+                    b.HasOne("Domain.Classes.Student", null)
                         .WithMany("Applications")
-                        .HasForeignKey("StudentId")
+                        .HasForeignKey("StudentId");
+
+                    b.HasOne("Domain.Classes.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Job");
 
-                    b.Navigation("Student");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Classes.Message", b =>

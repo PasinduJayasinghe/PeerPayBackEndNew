@@ -363,11 +363,13 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("CoverLetter")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("EmployerNotes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("JobId")
                         .IsRequired()
@@ -381,11 +383,14 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UpdatedBy")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("UpdatedBy")
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -394,7 +399,9 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.HasIndex("JobId", "StudentId")
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("JobId", "UserId")
                         .IsUnique();
 
                     b.ToTable("JobApplications");
@@ -1152,15 +1159,19 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Classes.Student", "Student")
+                    b.HasOne("Domain.Classes.Student", null)
                         .WithMany("Applications")
-                        .HasForeignKey("StudentId")
+                        .HasForeignKey("StudentId");
+
+                    b.HasOne("Domain.Classes.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Job");
 
-                    b.Navigation("Student");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Classes.Message", b =>

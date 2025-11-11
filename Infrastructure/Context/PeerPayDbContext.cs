@@ -97,10 +97,11 @@ namespace Infrastructure.Context
                     .HasForeignKey(s => s.StudentId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasMany(e => e.Applications)
-                    .WithOne(a => a.Student)
-                    .HasForeignKey(a => a.StudentId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                // Note: JobApplication now relates directly to User, not Student
+                // entity.HasMany(e => e.Applications)
+                //     .WithOne(a => a.Student)
+                //     .HasForeignKey(a => a.StudentId)
+                //     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(e => e.Earnings)
                     .WithOne(ea => ea.Student)
@@ -226,10 +227,31 @@ namespace Infrastructure.Context
                 entity.HasKey(e => e.ApplicationId);
                 entity.Property(e => e.ApplicationId).HasMaxLength(50);
                 entity.Property(e => e.JobId).HasMaxLength(50).IsRequired();
-                entity.Property(e => e.StudentId).HasMaxLength(50).IsRequired();
+                entity.Property(e => e.UserId).HasMaxLength(50).IsRequired();
                 entity.Property(e => e.UpdatedBy).HasMaxLength(50);
+                entity.Property(e => e.CoverLetter).HasMaxLength(2000);
+                entity.Property(e => e.EmployerNotes).HasMaxLength(1000);
 
-                entity.HasIndex(e => new { e.JobId, e.StudentId }).IsUnique();
+                // Convert string array to JSON for database storage
+                entity.Property(e => e.Attachments)
+                    .HasConversion(
+                        v => string.Join(',', v ?? Array.Empty<string>()),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    );
+
+                // Foreign key relationships
+                entity.HasOne(e => e.Job)
+                    .WithMany(j => j.Applications)
+                    .HasForeignKey(e => e.JobId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Unique constraint: user can only apply once per job
+                entity.HasIndex(e => new { e.JobId, e.UserId }).IsUnique();
             });
 
             // Payment Configuration

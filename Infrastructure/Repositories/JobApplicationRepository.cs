@@ -26,19 +26,18 @@ namespace Infrastructure.Repositories
         {
             return await _context.JobApplications
                 .Include(a => a.Job)
-                .Include(a => a.Student)
-                    .ThenInclude(s => s.User)
+                .Include(a => a.User)
                 .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
         }
 
-        public async Task<List<JobApplication>> GetApplicationsByStudentIdAsync(string studentId)
+        public async Task<List<JobApplication>> GetApplicationsByUserIdAsync(string userId)
         {
             return await _context.JobApplications
                 .Include(a => a.Job)
                     .ThenInclude(j => j.Employer)
                         .ThenInclude(e => e.User)
-                .Include(a => a.Student)
-                .Where(a => a.StudentId == studentId)
+                .Include(a => a.User)
+                .Where(a => a.UserId == userId)
                 .OrderByDescending(a => a.AppliedDate)
                 .ToListAsync();
         }
@@ -46,18 +45,18 @@ namespace Infrastructure.Repositories
         public async Task<List<JobApplication>> GetApplicationsByJobIdAsync(string jobId)
         {
             return await _context.JobApplications
-                .Include(a => a.Student)
-                    .ThenInclude(s => s.User)
+                .Include(a => a.User)
                 .Include(a => a.Job)
                 .Where(a => a.JobId == jobId)
                 .OrderByDescending(a => a.AppliedDate)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
-        public async Task<JobApplication?> GetApplicationByJobAndStudentAsync(string jobId, string studentId)
+        public async Task<JobApplication?> GetApplicationByJobAndUserAsync(string jobId, string userId)
         {
             return await _context.JobApplications
-                .FirstOrDefaultAsync(a => a.JobId == jobId && a.StudentId == studentId);
+                .FirstOrDefaultAsync(a => a.JobId == jobId && a.UserId == userId);
         }
 
         public async Task<bool> UpdateApplicationStatusAsync(string applicationId, ApplicationStatus status, string updatedBy, string? employerNotes = null)
@@ -94,10 +93,10 @@ namespace Infrastructure.Repositories
                 .CountAsync(a => a.JobId == jobId);
         }
 
-        public async Task<bool> HasStudentAppliedToJobAsync(string studentId, string jobId)
+        public async Task<bool> HasUserAppliedToJobAsync(string userId, string jobId)
         {
             return await _context.JobApplications
-                .AnyAsync(a => a.StudentId == studentId && a.JobId == jobId);
+                .AnyAsync(a => a.UserId == userId && a.JobId == jobId);
         }
     }
 }

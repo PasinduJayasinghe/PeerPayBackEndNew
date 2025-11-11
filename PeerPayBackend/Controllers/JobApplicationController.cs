@@ -22,10 +22,18 @@ namespace PeerPayBackend.Controllers
         /// POST /api/jobapplication/apply
         /// </summary>
         [HttpPost("apply")]
-        public async Task<ActionResult<JobApplicationDto>> ApplyToJob([FromBody] ApplyToJobCommand command)
+        public async Task<ActionResult<JobApplicationDto>> ApplyToJob([FromBody] ApplyToJobDto dto)
         {
             try
             {
+                // Map DTO to Command (studentId from frontend -> UserId in backend)
+                var command = new ApplyToJobCommand
+                {
+                    JobId = dto.JobId,
+                    UserId = dto.StudentId, // Frontend sends studentId but value is actually UserId
+                    CoverLetter = dto.CoverLetter
+                };
+
                 var result = await _mediator.Send(command);
                 return Ok(result);
             }
@@ -40,14 +48,14 @@ namespace PeerPayBackend.Controllers
 
         /// <summary>
         /// Get all applications for a student
-        /// GET /api/jobapplication/student/{studentId}
+        /// GET /api/jobapplication/student/{userId}
         /// </summary>
-        [HttpGet("student/{studentId}")]
-        public async Task<ActionResult<List<JobApplicationDto>>> GetStudentApplications(string studentId)
+        [HttpGet("student/{userId}")]
+        public async Task<ActionResult<List<JobApplicationDto>>> GetStudentApplications(string userId)
         {
             try
             {
-                var query = new GetStudentApplicationsQuery { StudentId = studentId };
+                var query = new GetStudentApplicationsQuery { UserId = userId };
                 var result = await _mediator.Send(query);
                 return Ok(result);
             }
